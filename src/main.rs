@@ -51,11 +51,3 @@ fn decrypt(key_str: &str, encrypted_data: &str) -> String {
 
     String::from_utf8(plaintext).expect("failed to convert vector of bytes to string")
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    pub fn fails() {
-        assert_eq!(std::env::var("HOME"), Ok(String::from("/home/daniele")));
-    }
-}
