@@ -1,13 +1,15 @@
-use serde_json::Value;
+use chrono::{Local, TimeZone};
 
 fn main() {
-    let json_str = r#"{ "name": "Alice", "age": 30, "is_student": false }"#;
+    // Get current time as Unix timestamp
+    let now = Local::now().timestamp();
 
-    // Parse JSON string into a serde_json::Value
-    let value: Value = serde_json::from_str(json_str).unwrap();
+    // Convert timestamp back to datetime
+    let datetime = Local.timestamp_opt(now, 0).unwrap();
 
-    // Access values dynamically
-    println!("{}", value["name"]); // Output: "Alice"
-    println!("{}", value["age"]); // Output: 30
-    println!("{}", value["is_student"]); // Output: false
+    // Format as 'YYYY/MM/DD hh:mm'
+    let formatted_time = datetime.format("%Y/%m/%d %H:%M").to_string();
+
+    // Print result
+    println!("time:{now} | {formatted_time}");
 }
