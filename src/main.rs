@@ -6,3 +6,4 @@ fn main() {
     let datetime = chrono::DateTime::from_timestamp(naive, 0);
     println!("Unix timestamp (UTC): {naive} {datetime:?}");
 }
+
