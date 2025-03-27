@@ -1,10 +1,8 @@
-use chrono::{Local, TimeZone, Utc};
+use chrono::Local;
 
 fn main() {
-    let now = Local::now(); // Get current local datetime
-    let naive = now.naive_local(); // Remove timezone info
-    let utc = Utc.from_utc_datetime(&naive); // Convert to UTC
-    let timestamp = utc.timestamp(); // Get Unix timestamp (seconds only)
+    let naive = Local::now().naive_local().and_utc().timestamp(); // Remove timezone info
 
-    println!("Unix timestamp (UTC, no milliseconds): {}", timestamp);
+    println!("Unix timestamp (UTC): {naive}");
 }
+
