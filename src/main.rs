@@ -1,47 +1,65 @@
 use crossterm::{
-    event::{self, KeyCode},
+    event::DisableMouseCapture,
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use ratatui::{
-    prelude::{CrosstermBackend, Terminal},
-    widgets::{Block, Borders},
+    Terminal,
+    backend::CrosstermBackend,
+    layout::{Constraint, Direction, Layout},
+    style::{Color, Style},
+    widgets::{Bar, BarChart, BarGroup, Block, Borders},
 };
-use std::{io, time::Duration};
+use std::{io, thread::sleep, time::Duration};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Set up terminal
+fn main() -> io::Result<()> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
-
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut running = true;
-    while running {
-        terminal.draw(|frame| {
-            let area = frame.area();
-            let block = Block::default()
-                .title(" Hello, Ratatui! ")
-                .borders(Borders::ALL);
-            frame.render_widget(block, area);
-        })?;
+    // Store formatted labels in Vec<String>
+    let labels: Vec<String> = (1..=30).map(|i| i.to_string()).collect();
 
-        // Handle user input
-        if event::poll(Duration::from_millis(200))? {
-            if let event::Event::Key(key) = event::read()? {
-                if key.code == KeyCode::Char('q') {
-                    running = false;
-                }
-            }
-        }
-    }
+    // Assign colors to bars (e.g., every 5th bar is red, others are white)
+    let bars: Vec<Bar<'_>> = labels
+        .iter()
+        .enumerate()
+        .map(|(i, label)| {
+            let color = if (i + 1) % 5 == 0 {
+                Color::Red
+            } else {
+                Color::White
+            };
+            Bar::default()
+                .value((i + 1) as u64)
+                .style(Style::default().fg(color))
+        })
+        .collect();
 
-    // Restore terminal
+    terminal.draw(|f| {
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Percentage(100)].as_ref())
+            .split(f.size());
+
+        let bar_chart = BarChart::default()
+            .block(
+                Block::default()
+                    .title("Colored Bar Chart")
+                    .borders(Borders::ALL),
+            )
+            .data(BarGroup::default().bars(&bars))
+            .bar_width(2)
+            .bar_gap(1);
+
+        f.render_widget(bar_chart, chunks[0]);
+    })?;
+
+    sleep(Duration::from_secs(2));
+
     disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-    terminal.show_cursor()?;
-
+    execute!(io::stdout(), LeaveAlternateScreen, DisableMouseCapture)?;
     Ok(())
 }
