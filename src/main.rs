@@ -1,25 +1,19 @@
-use chrono::{Datelike, NaiveDate};
-
-fn days_in_month(year: u32, month: u32) -> Vec<NaiveDate> {
-    let first_day = NaiveDate::from_ymd_opt(year as i32, month, 1).expect("Invalid year or month");
-
-    let num_days = first_day
-        .with_day(1)
-        .unwrap()
-        .with_month(month + 1)
-        .unwrap_or_else(|| NaiveDate::from_ymd_opt(year as i32 + 1, 1, 1).unwrap())
-        .signed_duration_since(first_day)
-        .num_days();
-
-    (0..num_days)
-        .map(|i| first_day + chrono::Duration::days(i))
-        .collect()
-}
+use chrono::NaiveDate;
 
 fn main() {
-    let days = days_in_month(2024, 4); // February 2024 (Leap Year)
-
-    for day in days {
-        println!("{}", day);
+    let year = 2024;
+    for (m, d) in (1..=12).map(|m| {
+        (
+            m,
+            if m == 12 {
+                NaiveDate::from_ymd_opt(year + 1, 1, 1).unwrap()
+            } else {
+                NaiveDate::from_ymd_opt(year, m + 1, 1).unwrap()
+            }
+            .signed_duration_since(NaiveDate::from_ymd_opt(year, m, 1).unwrap())
+            .num_days(),
+        )
+    }) {
+        println!("days {d} in month {m}");
     }
 }
