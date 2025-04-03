@@ -1,64 +1,25 @@
-use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEvent},
-    execute,
-    terminal::{
-        Clear, ClearType, DisableLineWrap, EnableLineWrap, EnterAlternateScreen,
-        LeaveAlternateScreen, disable_raw_mode, enable_raw_mode, size,
-    },
-};
-use std::{
-    io::{self, Write},
-    time::Duration,
-};
+use chrono::{Datelike, NaiveDate};
 
-fn draw<W: Write>(w: &mut W) -> io::Result<()> {
-    let (cols, rows) = size()?;
-    execute!(w, Clear(ClearType::All))?;
-    for y in 0..rows {
-        for x in 0..cols {
-            write!(w, "#")?;
-        }
-        if y == rows - 1 {
-            write!(w, "\r")?;
-        } else {
-            write!(w, "\r\n")?;
-        }
-    }
-    w.flush()
+fn days_in_month(year: u32, month: u32) -> Vec<NaiveDate> {
+    let first_day = NaiveDate::from_ymd_opt(year as i32, month, 1).expect("Invalid year or month");
+
+    let num_days = first_day
+        .with_day(1)
+        .unwrap()
+        .with_month(month + 1)
+        .unwrap_or_else(|| NaiveDate::from_ymd_opt(year as i32 + 1, 1, 1).unwrap())
+        .signed_duration_since(first_day)
+        .num_days();
+
+    (0..num_days)
+        .map(|i| first_day + chrono::Duration::days(i))
+        .collect()
 }
 
-fn main() -> io::Result<()> {
-    enable_raw_mode()?;
-    execute!(
-        io::stdout(),
-        EnterAlternateScreen,
-        EnableMouseCapture,
-        DisableLineWrap,
-    )?;
+fn main() {
+    let days = days_in_month(2024, 4); // February 2024 (Leap Year)
 
-    let mut stdout = io::stdout();
-    draw(&mut stdout)?;
-
-    loop {
-        if event::poll(Duration::from_millis(100))? {
-            match event::read()? {
-                Event::Key(KeyEvent {
-                    code: KeyCode::Esc, ..
-                }) => break,
-                Event::Resize(_, _) => {
-                    draw(&mut stdout)?;
-                }
-                _ => {}
-            }
-        }
+    for day in days {
+        println!("{}", day);
     }
-
-    execute!(
-        io::stdout(),
-        LeaveAlternateScreen,
-        DisableMouseCapture,
-        EnableLineWrap,
-    )?;
-    disable_raw_mode()?;
-    Ok(())
 }
