@@ -1,4 +1,8 @@
-use std::io::{self, Write};
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss
+)]
 
 struct BarChart {
     values: Vec<f64>,
@@ -46,20 +50,20 @@ impl BarChart {
             let color = self.colors[i % self.colors.len()];
 
             // Print the bar
-            print!("{}", color);
+            print!("{color}");
             for _ in 0..bar_width {
                 print!(" ");
             }
-            print!("{}", reset_color);
+            print!("{reset_color}");
 
             // Print the value on the right side
-            println!(" {:.1}", value);
+            println!(" {value:.1}");
         }
     }
 }
 
 fn main() {
-    let values = vec![15.0, 30.0, 10.0, 45.0, 25.0, 60.0, 35.0];
+    let values = vec![15.0, 30.0, 10.0, 45.0, 25.0, 60.0, 35.0, 34.];
     let chart = BarChart::new(values, 50); // 50 is the maximum width in characters
 
     println!("Bar Chart:");
