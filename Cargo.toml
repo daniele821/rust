@@ -4,7 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-aes-gcm = "0.10.3"
-chrono = "0.4.40"
+anyhow = "1.0.97"
 crossterm = "0.28.1"
-ratatui = "0.29.0"
